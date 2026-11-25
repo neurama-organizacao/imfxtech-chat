@@ -5,11 +5,18 @@ on:
     types: [opened]
   pull_request_target:
     types: [opened]
+  # Teste manual da configuração (Actions → Matrix Notification → Run workflow).
+  workflow_dispatch:
 
 jobs:
   notify:
-    if: ${{ (github.event_name == 'issues' && github.event.issue.user.login != 'krille-chan') || (github.event_name == 'pull_request_target' && github.event.pull_request.user.login != 'krille-chan') }}
+    # Avisa a sala Matrix da equipe (homeserver chat.adm.vps.imfxtech.com) quando
+    # abre issue ou PR. Ignora PRs do Dependabot para não poluir a sala.
+    # Não faz checkout: só lê dados do evento, por isso é seguro com
+    # pull_request_target.
+    if: ${{ github.event_name == 'issues' || github.event.pull_request.user.login != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Send notification to Matrix room
         env:
@@ -26,35 +33,55 @@ jobs:
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          if [ "${EVENT_NAME}" = "issues" ]; then
+          if [ -z "${HOMESERVER}" ] || [ -z "${ACCESS_TOKEN}" ] || [ -z "${ROOM_ID}" ]; then
+            echo "::warning title=Matrix Notification::Secrets MATRIX_HOMESERVER, MATRIX_ACCESS_TOKEN ou MATRIX_ROOM_ID não configurados; notificação pulada."
+            exit 0
+          fi
+          HOMESERVER="${HOMESERVER%/}"
+
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            EMOJI="✅"
+            PREFIX="Teste de notificação"
+            TITLE="Configuração do Matrix Notification OK (disparado por ${GITHUB_ACTOR})"
+            URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            LABELS=""
+            AUTHOR="${GITHUB_ACTOR}"
+          elif [ "${EVENT_NAME}" = "issues" ]; then
             EMOJI="📝"
-            PREFIX="New Issue"
+            PREFIX="Nova issue"
             TITLE="${ISSUE_TITLE}"
             URL="${ISSUE_URL}"
             LABELS="${ISSUE_LABELS}"
             AUTHOR="${ISSUE_AUTHOR}"
           else
             EMOJI="🔀"
-            PREFIX="New Pull Request"
+            PREFIX="Novo pull request"
             TITLE="${PR_TITLE}"
             URL="${PR_URL}"
             LABELS="${PR_LABELS}"
             AUTHOR="${PR_AUTHOR}"
           fi
 
+          esc() { jq -rn --arg v "$1" '$v|@html'; }
           AUTHOR_URL="https://github.com/${AUTHOR}"
-          PLAIN="${EMOJI} ${PREFIX} by ${AUTHOR}: ${TITLE} - ${URL}"
-          HTML="<h3>${EMOJI} ${PREFIX}</h3>"
-          HTML="${HTML}<b><a href='${URL}'>${TITLE}</a></b><br/>"
-          HTML="${HTML}👤 <a href='${AUTHOR_URL}'>${AUTHOR}</a>"
+          PLAIN="${EMOJI} ${PREFIX} de ${AUTHOR} em ${GITHUB_REPOSITORY}: ${TITLE} - ${URL}"
+          HTML="<h3>${EMOJI} ${PREFIX} em $(esc "${GITHUB_REPOSITORY}")</h3>"
+          HTML="${HTML}<b><a href='$(esc "${URL}")'>$(esc "${TITLE}")</a></b><br/>"
+          HTML="${HTML}👤 <a href='$(esc "${AUTHOR_URL}")'>$(esc "${AUTHOR}")</a>"
           if [ -n "${LABELS}" ]; then
-            HTML="${HTML}<br/>🏷️ ${LABELS}"
+            HTML="${HTML}<br/>🏷️ $(esc "${LABELS}")"
           fi
-          TXN_ID=$(date +%s%N)
+          TXN_ID="gh-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          ROOM_ENC=$(jq -rn --arg v "${ROOM_ID}" '$v|@uri')
 
-          curl -s -o /dev/null -w "%{http_code}" -X PUT \
-            "${HOMESERVER}/_matrix/client/v3/rooms/${ROOM_ID}/send/m.room.message/${TXN_ID}" \
+          STATUS=$(curl -sS -o response.json -w "%{http_code}" --max-time 30 -X PUT \
+            "${HOMESERVER}/_matrix/client/v3/rooms/${ROOM_ENC}/send/m.room.message/${TXN_ID}" \
             -H "Authorization: Bearer ${ACCESS_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "$(jq -n --arg body "$PLAIN" --arg html "$HTML" \
-              '{"msgtype":"m.notice","body":$body,"format":"org.matrix.custom.html","formatted_body":$html}')"
+              '{"msgtype":"m.notice","body":$body,"format":"org.matrix.custom.html","formatted_body":$html}')") || true
+          if [ "${STATUS}" != "200" ]; then
+            echo "::error title=Matrix Notification::Homeserver respondeu HTTP ${STATUS}: $(jq -r '.errcode + " " + .error' response.json 2>/dev/null)"
+            exit 1
+          fi
+          echo "Notificação enviada (HTTP ${STATUS})."
