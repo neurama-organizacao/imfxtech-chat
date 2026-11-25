@@ -123,7 +123,7 @@ jobs:
         run: |
           mv build/app/outputs/apk/release/app-release.apk \
              "build/app/outputs/apk/release/imfxtech-chat-$NEW_VERSION.apk"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: imfxtech-chat-android
           path: build/app/outputs/apk/release/imfxtech-chat-*.apk
@@ -137,7 +137,7 @@ jobs:
           flutter build appbundle --release
           cp build/app/outputs/bundle/release/app-release.aab \
              "build/app/outputs/bundle/release/imfxtech-chat-$NEW_VERSION.aab"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: imfxtech-chat-android-aab
           path: build/app/outputs/bundle/release/imfxtech-chat-*.aab
@@ -299,7 +299,7 @@ jobs:
           cd build/ios/ipa
           zip -r "imfxtech-chat-$NEW_VERSION-unsigned.ipa" Payload
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: imfxtech-chat-ios
           path: build/ios/ipa/imfxtech-chat-*.ipa
@@ -406,7 +406,7 @@ jobs:
           # Espera tolerante a queda de rede (o `--wait` derrubou a v1.1.5).
           ASC_KEY_PATH=~/.private_keys/AuthKey_$ASC_KEY_ID.p8 scripts/notarize-dmg.sh "$DMG"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: imfxtech-chat-macos
           path: build/macos/dmg/imfxtech-chat-*-macos.dmg
@@ -536,7 +536,7 @@ jobs:
       # Not a GitHub Release asset: a Mac App Store .pkg isn't notarized on its
       # own (trust comes from the store receipt), so Gatekeeper blocks it for
       # anyone who downloads it outside the store. Kept only for audit.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.signing.outputs.enabled == 'true'
         with:
           name: imfxtech-chat-macos-appstore
