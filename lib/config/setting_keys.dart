@@ -63,12 +63,12 @@ enum AppSettings<T> {
   welcomeText<String>('chat.fluffy.welcome_text', ''),
   website<String>(
     'chat.fluffy.website_url',
-    'https://github.com/marcelofmatos/imfxtech-chat',
+    'https://github.com/neurama-organizacao/imfxtech-chat',
   ),
   logoUrl<String>('chat.fluffy.logo_url', ''),
   privacyPolicy<String>(
     'chat.fluffy.privacy_policy_url',
-    'https://github.com/marcelofmatos/imfxtech-chat/blob/main/PRIVACY.md',
+    'https://github.com/neurama-organizacao/imfxtech-chat/blob/main/PRIVACY.md',
   ),
   tos<String>('chat.fluffy.tos_url', ''),
   sendTimelineEventTimeout<int>('chat.fluffy.send_timeline_event_timeout', 15),
