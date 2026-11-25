@@ -1,9 +1,8 @@
 name: Main Deploy Workflow
 
+# imfxtech-chat: só manual. Não publicamos a versão web e a org não tem o
+# secret PAGES_DEPLOY_TOKEN, então rodar a cada push na main só gerava falha.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 concurrency:
