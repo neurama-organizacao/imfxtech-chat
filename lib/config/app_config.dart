@@ -34,25 +34,25 @@ abstract class AppConfig {
   static const String appSsoUrlScheme = 'com.imfxtech.chat.auth';
 
   static const String sourceCodeUrl =
-      'https://github.com/marcelofmatos/imfxtech-chat';
+      'https://github.com/neurama-organizacao/imfxtech-chat';
   static const String supportUrl =
-      'https://github.com/marcelofmatos/imfxtech-chat/issues';
+      'https://github.com/neurama-organizacao/imfxtech-chat/issues';
   static const String changelogUrl =
-      'https://github.com/marcelofmatos/imfxtech-chat/blob/main/CHANGELOG.md';
+      'https://github.com/neurama-organizacao/imfxtech-chat/blob/main/CHANGELOG.md';
 
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
   static final Uri newIssueUrl = Uri(
     scheme: 'https',
     host: 'github.com',
-    path: '/marcelofmatos/imfxtech-chat/issues/new',
+    path: '/neurama-organizacao/imfxtech-chat/issues/new',
   );
 
   static final Uri homeserverList = Uri(
     scheme: 'https',
     host: 'raw.githubusercontent.com',
     path:
-        'marcelofmatos/imfxtech-chat/refs/heads/main/recommended_homeservers.json',
+        'neurama-organizacao/imfxtech-chat/refs/heads/main/recommended_homeservers.json',
   );
 
   static final Uri crashReportEndpoint = Uri(
