@@ -5,6 +5,8 @@ on:
     types: [opened]
   pull_request_target:
     types: [opened]
+  # Teste manual da configuração (Actions → Matrix Notification → Run workflow).
+  workflow_dispatch:
 
 jobs:
   notify:
@@ -37,7 +39,14 @@ jobs:
           fi
           HOMESERVER="${HOMESERVER%/}"
 
-          if [ "${EVENT_NAME}" = "issues" ]; then
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            EMOJI="✅"
+            PREFIX="Teste de notificação"
+            TITLE="Configuração do Matrix Notification OK (disparado por ${GITHUB_ACTOR})"
+            URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            LABELS=""
+            AUTHOR="${GITHUB_ACTOR}"
+          elif [ "${EVENT_NAME}" = "issues" ]; then
             EMOJI="📝"
             PREFIX="Nova issue"
             TITLE="${ISSUE_TITLE}"
