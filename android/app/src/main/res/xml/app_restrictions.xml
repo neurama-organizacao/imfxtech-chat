@@ -16,4 +16,10 @@
     android:title="Welcome text"
     android:restrictionType="string" />
 
+  <restriction
+    android:key="defaultEmoteRoomAlias"
+    android:title="Default emote room alias (localpart, empty disables)"
+    android:restrictionType="string"
+    android:defaultValue="emojis" />
+
 </restrictions>

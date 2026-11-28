@@ -33,6 +33,7 @@ import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
+import '../utils/default_emote_room.dart';
 import 'local_notifications_extension.dart';
 
 class Matrix extends StatefulWidget {
@@ -179,6 +180,7 @@ class MatrixState extends State<Matrix> {
   final onNotification = <String, StreamSubscription>{};
   final onLogoutSub = <String, StreamSubscription<LoginState>>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
+  final _defaultEmoteRoomStarted = <String>{};
 
   String? _cachedPassword;
   Timer? _cachedPasswordClearTimer;
@@ -281,6 +283,14 @@ class MatrixState extends State<Matrix> {
           FluffyChatApp.router.go('/');
         });
     onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
+    if (_defaultEmoteRoomStarted.add(name)) {
+      unawaited(
+        applyDefaultEmoteRoom(
+          c,
+          aliasSetting: AppSettings.defaultEmoteRoomAlias.value,
+        ),
+      );
+    }
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       FlutterLocalNotificationsPlugin().initialize(
         settings: InitializationSettings(
@@ -313,6 +323,7 @@ class MatrixState extends State<Matrix> {
     onLogoutSub.remove(name);
     onNotification[name]?.cancel();
     onNotification.remove(name);
+    _defaultEmoteRoomStarted.remove(name);
   }
 
   void initMatrix() {
