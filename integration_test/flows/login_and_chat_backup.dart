@@ -57,6 +57,14 @@ extension on FluffyChatTester {
     await enterText(TextField, passphrase1, index: 0);
     await enterText(TextField, passphrase1, index: 1);
     await tapOn('Continue', pumpAndSettle: false);
+    // Upstream 3ef51a5f1: the homeserver may ask for the password (UIA).
+    if (await isVisible(
+      'Please enter your password',
+      timeout: const Duration(seconds: 10),
+    )) {
+      await enterText(DialogTextField, user1Pw, pumpAndSettle: false);
+      await tapOn('Ok');
+    }
     await waitFor('You are ready to start!');
     await tapOn('Continue');
     AuthFlows.userPassphrases[user1Name] = passphrase1;

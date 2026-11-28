@@ -7,6 +7,14 @@ import 'package:fluffychat/main.dart' as app;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Max time to wait for a single frame. The live binding's `pump()` only
+/// completes when the engine draws a frame, so without this limit a test
+/// hangs forever when the app is not drawing (e.g. not in foreground).
+const _frameTimeout = Duration(seconds: 15);
+
+/// Max time for `pumpAndSettle()` (the default is 10 minutes).
+const _settleTimeout = Duration(seconds: 60);
+
 extension type FluffyChatTester(WidgetTester tester) {
   static int _printCounter = 1;
 
@@ -15,6 +23,21 @@ extension type FluffyChatTester(WidgetTester tester) {
       '[INTEGRATION TEST] ${DateTime.now().toIso8601String()} | Step ${_printCounter++} -  $message',
     );
   }
+
+  Future<void> _pump(Duration duration) => tester
+      .pump(duration)
+      .timeout(
+        _frameTimeout,
+        onTimeout: () => throw Exception(
+          '⏱️ No frame rendered within ${_frameTimeout.inSeconds}s (app not drawing / not in foreground?)',
+        ),
+      );
+
+  Future<void> _settle() => tester.pumpAndSettle(
+    const Duration(milliseconds: 100),
+    EnginePhase.sendSemanticsUpdate,
+    _settleTimeout,
+  );
 
   Future<bool> isVisible(
     Object object, {
@@ -25,7 +48,7 @@ extension type FluffyChatTester(WidgetTester tester) {
       if (DateTime.now().isAfter(end)) {
         return false;
       }
-      await tester.pump(const Duration(milliseconds: 500));
+      await _pump(const Duration(milliseconds: 500));
     }
     return true;
   }
@@ -40,7 +63,7 @@ extension type FluffyChatTester(WidgetTester tester) {
       if (DateTime.now().isAfter(end)) {
         throw Exception('⏱️ Timed out waiting for "$object"!');
       }
-      await tester.pump(const Duration(milliseconds: 500));
+      await _pump(const Duration(milliseconds: 500));
     }
   }
 
@@ -73,7 +96,7 @@ extension type FluffyChatTester(WidgetTester tester) {
 
     _print('👆 Tapping on "$object"');
     await tester.tap(finder);
-    if (pumpAndSettle) await tester.pumpAndSettle();
+    if (pumpAndSettle) await _settle();
   }
 
   Future<void> goBack() => tapOn(find.byTooltip('Back'));
@@ -89,7 +112,7 @@ extension type FluffyChatTester(WidgetTester tester) {
     _print('⌨️ Enter "$text" into "$object"');
     await tester.enterText(finder, text);
     FocusManager.instance.primaryFocus?.unfocus();
-    if (pumpAndSettle) await tester.pumpAndSettle();
+    if (pumpAndSettle) await _settle();
   }
 
   Future<void> scrollUntilVisible(
@@ -103,7 +126,7 @@ extension type FluffyChatTester(WidgetTester tester) {
       500.0,
       scrollable: scrollable?.toFinder() ?? find.byType(Scrollable).last,
     );
-    await tester.pumpAndSettle();
+    await _settle();
   }
 }
 
@@ -123,6 +146,8 @@ extension StartTest on WidgetTester {
   Future<FluffyChatTester> startFluffyChatTest() async {
     app.main(['integration_test']);
 
-    return FluffyChatTester(this);
+    final tester = FluffyChatTester(this);
+    tester._print('🚀 app.main called');
+    return tester;
   }
 }

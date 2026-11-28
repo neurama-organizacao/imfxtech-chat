@@ -15,11 +15,14 @@ import 'flows/multi_account.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  // Without a limit, a hanging test blocks the CI job until it is cancelled.
+  const t = Timeout(Duration(minutes: 4));
+
   group('FluffyChat Integration Tests', () {
-    testWidgets('Login and logout flow', loginAndChatBackup);
-    testWidgets('Basic Messaging', basicMessaging);
-    testWidgets('Multi-Account', multiAccount);
-    testWidgets('Archive chats', archiveChats);
-    testWidgets('Final logout', finalLogout);
+    testWidgets('Login and logout flow', loginAndChatBackup, timeout: t);
+    testWidgets('Basic Messaging', basicMessaging, timeout: t);
+    testWidgets('Multi-Account', multiAccount, timeout: t);
+    testWidgets('Archive chats', archiveChats, timeout: t);
+    testWidgets('Final logout', finalLogout, timeout: t);
   });
 }
