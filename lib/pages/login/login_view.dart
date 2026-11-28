@@ -65,6 +65,7 @@ class LoginView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: TextField(
+                    key: const Key('login_username_field'),
                     readOnly: controller.loading,
                     autocorrect: false,
                     autofocus: true,
@@ -88,6 +89,7 @@ class LoginView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: TextField(
+                    key: const Key('login_password_field'),
                     readOnly: controller.loading,
                     autocorrect: false,
                     autofillHints: controller.loading
@@ -119,6 +121,7 @@ class LoginView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ElevatedButton(
+                    key: const Key('login_button'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: theme.colorScheme.onPrimary,

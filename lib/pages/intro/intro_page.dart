@@ -144,6 +144,7 @@ class IntroPage extends StatelessWidget {
                               crossAxisAlignment: .stretch,
                               children: [
                                 FilledButton(
+                                  key: const Key('intro_sign_in_button'),
                                   onPressed: () async {
                                     final client = await Matrix.of(
                                       context,

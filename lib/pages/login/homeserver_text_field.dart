@@ -34,6 +34,7 @@ class HomeserverTextField extends StatelessWidget {
       mainAxisSize: .min,
       children: [
         TextField(
+          key: const Key('login_homeserver_field'),
           readOnly: readOnly,
           controller: controller,
           autocorrect: false,
