@@ -29,5 +29,6 @@
   "noEncryptionWarningShown": false,
   "displayChatDetailsColumn": false,
   "colorSchemeSeedInt": 4292389204,
-  "enableSoftLogout": false
+  "enableSoftLogout": false,
+  "defaultEmoteRoomAlias": "emojis"
 }

@@ -81,7 +81,14 @@ enum AppSettings<T> {
   benchmarksInLogs<bool>('chat.fluffy.benchmarks_in_logs', false),
   autoSendErrorReports<bool?>('chat.fluffy.auto_send_eror_reports', null),
   knownErrorHashes<List<String>>('chat.fluffy.known_crash_hashes', []),
-  customLiveKitInstance<String>('chat.fluffy.custom_live_kit_instance', '');
+  customLiveKitInstance<String>('chat.fluffy.custom_live_kit_instance', ''),
+
+  /// Localpart do alias da sala de emojis do servidor do usuário
+  /// (`#<valor>:<server_name>`). Vazio desliga. Ver docs/SALA_DE_EMOJIS.md.
+  defaultEmoteRoomAlias<String>(
+    'com.imfxtech.default_emote_room_alias',
+    'emojis',
+  );
 
   final String key;
   final T _defaultValue;
